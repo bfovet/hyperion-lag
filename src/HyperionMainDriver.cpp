@@ -42,11 +42,13 @@ void HyperionMainDriver::load_mesh()
   gmsh::initialize();
   gmsh::option::setNumber("General.Terminal", 1);
 
-  if (auto mesh_file_node = m_dataset["Mesh"]["MeshFile"]) {
+  if (auto mesh_file_node = m_dataset["Mesh"]["MeshFile"]){
     gmsh::open(mesh_file_node.as<std::string>());
-  } else {
-    throw std::runtime_error("[Driver::load_mesh] Error : 'MeshFile' property is required");
   }
+
+  else{
+    throw std::runtime_error("[Driver::load_mesh] Error : 'MeshFile' property is required");
+    }
 
   // Read environments for initial conditions
   std::vector<std::pair<int, int>> ic_envs;
@@ -98,18 +100,17 @@ void HyperionMainDriver::load_mesh()
 
   // Create VTK points
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+  auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+ 
   // Insert points from Gmsh node coordinates
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+  for (std::size_t n = 0; n < nodes.size(); ++n)
+      vtkpoints ->InsertPoint(nodes[n] - 1, coords[n * 3], coords[n * 3 + 1], coords[n * 3 + 2]);
+  
   // Create a VTK unstructured grid
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  m_mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  m_mesh->SetPoints(vtkpoints);
 
   int nb_cells_to_allocate = 0;
   {
@@ -117,28 +118,32 @@ void HyperionMainDriver::load_mesh()
     std::vector<std::size_t> nodes;
     gmsh::model::mesh::getElementsByType(3, cells, nodes);
     nb_cells_to_allocate = cells.size();
+    
+  
   }
-
+    
   // Allocate cells
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  m_mesh->Allocate(nb_cells_to_allocate);
 
   // Get global cells and nodes
   nodes.clear();
   std::vector<std::size_t> cells;
   gmsh::model::mesh::getElementsByType(MSH_QUAD_4, cells, nodes);
-
+  
   for (std::size_t c = 0; c < cells.size(); ++c) {
     m_msh_vtk_cells[cells[c]] = c;
     m_vtk_msh_cells[c] = cells[c];
 
     // Insert connectivites, i.e. nodes connected to a cell
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Write code here
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    vtkIdType idType[4];
+    for (size_t i = 0; i < 4; i++)
+      idType[i] = nodes[c*4 + i]-1;
+      
+    m_mesh->InsertNextCell(VTK_QUAD, 4, idType);
   }
-
+  
   gmsh::finalize();
 
   std::cout << "[Driver::load_mesh] Mesh created\n";
