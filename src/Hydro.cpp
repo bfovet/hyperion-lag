@@ -15,7 +15,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkDoubleArray.h>
-#include <vtkCellData.h>
+#include <vtkCellData.hconnectivité>
 #include <vtkPointData.h>
 
 /*---------------------------------------------------------------------------*/
@@ -35,6 +35,16 @@ void add_cell_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   // Create a VTK double array, insert values and attach it to the mesh
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
+  vtkFloatArray *da = vtkFloatArray::New();
+  da->Allocate(field.size());
+  da->SetName(field_name.c_str());
+  da->SetNumberOfComponents(1);
+
+  for (auto f : field) {
+    da->InsertNextValue(f);
+  }
+
+  mesh->GetCellData()->AddArray(da);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
@@ -48,6 +58,16 @@ void add_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   // Create a VTK double array, insert values and attach it to the mesh
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
+  vtkFloatArray *da = vtkFloatArray::New();
+  da->Allocate(field.size());
+  da->SetName(field_name.c_str());
+  da->SetNumberOfComponents(1);
+
+  for (auto f : field) {
+    da->InsertNextValue(f);
+  }
+
+  mesh->GetPointData()->AddArray(da);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
