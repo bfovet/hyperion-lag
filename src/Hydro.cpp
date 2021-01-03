@@ -15,7 +15,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkDoubleArray.h>
-#include <vtkCellData.hconnectivité>
+#include <vtkCellData.h>
 #include <vtkPointData.h>
 
 /*---------------------------------------------------------------------------*/
