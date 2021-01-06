@@ -37,11 +37,11 @@ void add_cell_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   // TODO : write code here
   auto new_field = vtkSmartPointer<vtkDoubleArray>::New();
   new_field->SetName(field_name.c_str());
-  new_field->SetNumberOfValues(field.size());
-
+  new_field->Allocate(field.size());
+  
   for (auto f : field)
     new_field->InsertNextValue(f);
-  mesh->GetCellData()->AddArray(new_field);
+  mesh->GetFieldData()->AddArray(new_field);
 }
 
 //----------------------------------------------------------------------------
@@ -55,12 +55,13 @@ void add_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
    auto new_field = vtkSmartPointer<vtkDoubleArray>::New();
+  new_field->Allocate(field.size());
   new_field->SetName(field_name.c_str());
-  new_field->SetNumberOfValues(field.size());
   
   for (auto f: field)
     new_field->InsertNextValue(f);
-  mesh->GetPointData()->AddArray(new_field);
+
+  mesh->GetFieldData()->AddArray(new_field);
 }
 
 //----------------------------------------------------------------------------
@@ -74,12 +75,14 @@ void add_vector_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
   auto new_field = vtkSmartPointer<vtkDoubleArray>::New();
+  new_field->SetNumberOfComponents(2);
+  new_field->Allocate(field.size()*2);
   new_field->SetName(field_name.c_str());
-
+  
   for (auto f : field)
     new_field->InsertNextTuple2(f.first, f.second);
   
-  mesh->GetPointData()->AddArray(new_field);
+  mesh->GetFieldData()->AddArray(new_field);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -130,7 +133,7 @@ void Hydro::init()
 
     int nb_nodes_for_cell = cell->GetNumberOfPoints(); // Change this line to get the correct number of nodes
     for (int n = 0; n < nb_nodes_for_cell; ++n) {
-      auto node = n; // Change this line to get the global node id
+      auto node = cell->GetPointIds()->GetId(n); // Change this line to get the global node id
       m_vars->m_node_mass[node] += node_mass_contrib;
     }
   }
@@ -228,7 +231,7 @@ void Hydro::compute_pressure_force()
 
     int nb_nodes_for_cell = cell->GetNumberOfPoints(); // Change this line to get the correct number of nodes
     for (int n = 0; n < nb_nodes_for_cell; ++n) {
-      auto node = n; // Change this line to get the global node id
+      auto node = cell->GetPointIds()->GetId(n); // Change this line to get the global node id
       double force = m_vars->m_pressure[c] +
                      m_vars->m_artificial_viscosity[c] * 20.0;
       m_vars->m_force[node].first += force * m_vars->m_cqs[c][n].first;
@@ -318,8 +321,7 @@ void Hydro::move_nodes()
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // TODO : write code here
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    std::pair<double,double> &node = m_vars->m_node_coord[n];
-    double new_coords[3] = {node.first, node.second, 0.0};
+    double new_coords[2] = {m_vars->m_node_coord[n].first, m_vars->m_node_coord[n].second};
     m_mesh->GetPoints()->SetPoint(n, new_coords);
 
   }
@@ -385,9 +387,10 @@ void Hydro::dump(int step, double simulation_time)
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  vtkSmartPointer<vtkDoubleArray> field_data = vtkSmartPointer<vtkDoubleArray>::New();
-  field_data->SetNumberOfComponents(1);
+  auto field_data = vtkSmartPointer<vtkDoubleArray>::New();
+  
   field_data->SetName("TimeValue");
+  field_data->SetNumberOfTuples(1);
   field_data->InsertNextValue(simulation_time);
   m_mesh->GetFieldData()->AddArray(field_data);
 
@@ -408,7 +411,7 @@ void Hydro::dump(int step, double simulation_time)
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // TODO : write code here
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+  auto writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
   writer->SetFileName(file_name.c_str());
   writer->SetInputData(m_mesh);
   writer->Write();
