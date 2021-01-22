@@ -169,6 +169,18 @@ int HyperionMainDriver::run()
     bool last_iteration = (simulation_time == final_time + hydro->dt());
     // TODO: if ANALYZE_INSITU, then call the appropriate method, else call dump
 
+    // ---------------> Answer <-----------------------
+    // Soit on fait la visu insitu soit on génére les fichiers vtk avec dump 
+    // ca dépends si ANALYSE_INSITU est ON ou OFF
+    #ifdef ANALYZE_INSITU
+      hydro->analyze_insitu(simulation_time, step,last_iteration);
+    #endif
+
+    #ifndef ANALYZE_INSITU
+      hydro->dump(simulation_time, step);
+    #endif
+    // ------------------------------
+
     hydro->compute_pressure_force();
     hydro->compute_artificial_viscosity();
     hydro->compute_velocity();

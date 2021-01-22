@@ -399,6 +399,10 @@ void Hydro::analyze_insitu(double simulation_time, int iteration, bool last_iter
 
   this->update_fields(simulation_time);
   // TODO: Execute the Catalyst adaptor
+  // ---------------> Answer <-----------------------
+  CatalystAdaptor::execute(m_mesh, simulation_time, m_dt, last_iteration);
+  // ------------------------------------------------
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -430,6 +434,9 @@ void Hydro::update_fields(double simulation_time)
 void Hydro::init_insitu()
 {
   // TODO: Initialize the Catalyst adaptor with a Python script
+  // ---------------> Answer <-----------------------
+  CatalystAdaptor::init('test/catalyst_insitu.py');
+  // ------------------------------------------------
 }
 
 /*---------------------------------------------------------------------------*/
@@ -438,6 +445,9 @@ void Hydro::init_insitu()
 void Hydro::finalize_insitu()
 {
   // TODO: Wrap up the app by finalizing the Catalyst adaptor
+  // ---------------> Answer <-----------------------
+  CatalystAdaptor::finalize();
+  // ------------------------------------------------
 }
 
 /*---------------------------------------------------------------------------*/
