@@ -1,6 +1,8 @@
+# Groupe : zineb Baroudi & Achraf Bentaher
+
 # HyPERION-lag
 
-This is **HyPERION**, as in *Hydrodynamics Platform for Exascale Research, In situ analysis and OptimizatioN* - Lagrangian variant
+This is **HyPERION**, as in _Hydrodynamics Platform for Exascale Research, In situ analysis and OptimizatioN_ - Lagrangian variant
 
 The example used in this project is heavily inspired by
 [MicroHydroProject](https://github.com/cea-hpc/Modane/tree/master/plugins/fr.cea.modane.ui/examples/MicroHydroProject)
